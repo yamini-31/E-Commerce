@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     'rest_framework',
-    'product_app'
+    'product_app',
+    'customer_app'
 ]
 
 MIDDLEWARE = [
@@ -76,14 +77,9 @@ WSGI_APPLICATION = "project.wsgi.application"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'djongo',
-        'NAME': 'Ecommercedb',  # Replace with your actual database name
-        'CLIENT': {
-            'host': 'mongodb+srv://mongodb:mongodb@cluster0.doegm.mongodb.net/Ecommercedb?retryWrites=true&w=majority&appName=Cluster0',
-            'username': 'mongodb',  # Replace if your username is different
-            'password': 'mongodb',  # Replace if your password is different
-        }
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
 
@@ -129,3 +125,9 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+}
