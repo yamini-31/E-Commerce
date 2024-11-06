@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    'rest_framework'
 ]
 
 MIDDLEWARE = [
@@ -74,11 +75,17 @@ WSGI_APPLICATION = "project.wsgi.application"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+    'default': {
+        'ENGINE': 'djongo',
+        'NAME': 'Ecommercedb',  # Replace with your actual database name
+        'CLIENT': {
+            'host': 'mongodb+srv://mongodb:mongodb@cluster0.doegm.mongodb.net/Ecommercedb?retryWrites=true&w=majority&appName=Cluster0',
+            'username': 'mongodb',  # Replace if your username is different
+            'password': 'mongodb',  # Replace if your password is different
+        }
     }
 }
+
 
 
 # Password validation
