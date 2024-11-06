@@ -5,8 +5,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth.hashers import make_password, check_password
 from rest_framework_simplejwt.tokens import AccessToken
-from .models import Customer
+from .models import *
+from django.http import JsonResponse
+from django.db.models import F, Sum
 from .serializers import CustomerSerializer
+from django.shortcuts import get_object_or_404
+
 
  #JWT token
 def get_access_token(customer):
@@ -106,6 +110,62 @@ def update_customer(request, customer_id):
         return Response({"detail": "Customer not found"}, status=status.HTTP_404_NOT_FOUND)
 
 
+
+#add item to the cart
+
+@api_view(['POST'])
+def add_product_to_cart(request):
+    customer_id = request.data.get('customer_id')
+    product_id = request.data.get('product_id')
+    quantity = request.data.get('quantity', 1)
+
+    customer = get_object_or_404(Customer, id=customer_id)
+    product = get_object_or_404(Product, product_id=product_id)
+
+    price = product.product_price
+   
+    cart_item, created = Cart.objects.get_or_create(
+        customer=customer,
+        product=product,
+        defaults={'quantity': quantity, 'price': price}
+    )
+
+    if not created:
+        cart_item.quantity += quantity
+        cart_item.save()
+
+    return JsonResponse({'message': 'Product added to cart successfully', 'cart_item_id': cart_item.id})
+
+
+
+#remove item from the cart
+@api_view(['DELETE'])
+def remove_product_from_cart(request):
+    cart_item_id = request.data.get('cart_item_id')
+
+    cart_item = get_object_or_404(Cart, id=cart_item_id)
+    cart_item.delete()
+
+    return JsonResponse({'message': 'Product removed from cart successfully'})
+
+#calculate the final bill of the cart 
+
+# Function to calculate the total price of the cart
+def calculate_final_price(customer_id):
+    cart_items = Cart.objects.filter(customer_id=customer_id)
+    
+    
+    total_price = cart_items.annotate(
+        final_price=F('quantity') * F('price')
+    ).aggregate(total=Sum('final_price'))
+    
+    return total_price['total'] or 0
+
+
+@api_view(['GET'])
+def get_cart_total(request, customer_id):
+    total = calculate_final_price(customer_id)
+    return Response({'total_price': total})
 
 
 
