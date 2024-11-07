@@ -1,3 +1,4 @@
+from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Product
@@ -59,3 +60,33 @@ def get_product_by_seller_id(request):
     products = Product.objects.filter(seller_id=seller_id)
     serializer = ProductSerializer(products, many=True)
     return Response(serializer.data)
+
+@api_view(["GET","DELETE"])
+def delete_product(request):
+    product_id = request.GET.get('product_id')
+    if not product_id:
+        return Response({'error': 'product_id parameter is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        product = Product.objects.get(product_id=product_id)
+        product.delete()
+        return Response({'message': 'Product deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+    except Product.DoesNotExist:
+        return Response({'error': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(["PUT"])
+def update_product(request):
+    product_id = request.GET.get('product_id')
+    if not product_id:
+        return Response({'error': 'product_id parameter is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        product = Product.objects.get(product_id=product_id)
+    except Product.DoesNotExist:
+        return Response({'error': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = ProductSerializer(product, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({'message': 'Product updated successfully', 'product': serializer.data})
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
