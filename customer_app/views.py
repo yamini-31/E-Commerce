@@ -1,62 +1,110 @@
 from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import api_view, permission_classes
-from django.contrib.auth.hashers import make_password, check_password
-from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework.decorators import api_view
+from django.contrib.auth.hashers import  check_password
+
 from .models import *
 from django.http import JsonResponse
 from django.db.models import F, Sum
-from .serializers import CustomerSerializer
+from .serializers import CustomerSerializer,CustomerLoginSerializer
 from django.shortcuts import get_object_or_404
-
+from project.utils import decode_jwt_token,generate_jwt_token
 
  #JWT token
-def get_access_token(customer):
-    access = AccessToken.for_user(customer)
-    return str(access)
+# def get_access_token(customer):
+#     access = AccessToken.for_user(customer)
+#     return str(access)
 
 # Signup view
-@api_view(['POST'])
-def customer_signup(request):
-    data = request.data
-    data['customer_password'] = make_password(data['customer_password'])  # Hash the password
-    serializer = CustomerSerializer(data=data)
+# @api_view(['POST'])
+# def customer_signup(request):
+#     data = request.data
+#     data['customer_password'] = make_password(data['customer_password'])  # Hash the password
+#     serializer = CustomerSerializer(data=data)
 
-    if serializer.is_valid():
-        customer = serializer.save()  
-        access_token = get_access_token(customer)  
-        return Response({'customer': serializer.data, 'access': access_token}, status=status.HTTP_201_CREATED)
+#     if serializer.is_valid():
+#         customer = serializer.save()  
+#         access_token = get_access_token(customer)  
+#         return Response({'customer': serializer.data, 'access': access_token}, status=status.HTTP_201_CREATED)
     
+#     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+
+def register_customer(request):
+    serializer = CustomerSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()  # Password will be hashed before saving
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # Login view
+# @api_view(['POST'])
+# def customer_login(request):
+#     username = request.data.get('customer_username')
+#     password = request.data.get('customer_password')
+
+   
+#     customers = Customer.objects.filter(customer_username=username)
+
+   
+#     if customers.exists():
+#         customer = customers.first()  
+
+#         if check_password(password, customer.customer_password):
+#             access_token = get_access_token(customer)  # Use the same function to get the access token
+#             return Response({'message': 'Login successful', 'access': access_token}, status=status.HTTP_200_OK)
+#         else:
+#             return Response({'message': 'Invalid username or password'}, status=status.HTTP_401_UNAUTHORIZED)
+#     else:
+#         return Response({'error': 'Customer not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
 @api_view(['POST'])
-def customer_login(request):
-    username = request.data.get('customer_username')
-    password = request.data.get('customer_password')
-
-   
-    customers = Customer.objects.filter(customer_username=username)
-
-   
-    if customers.exists():
-        customer = customers.first()  
-
-        if check_password(password, customer.customer_password):
-            access_token = get_access_token(customer)  # Use the same function to get the access token
-            return Response({'message': 'Login successful', 'access': access_token}, status=status.HTTP_200_OK)
+def login_customer(request):
+    auth_header = request.headers.get("Authorization")
+    if auth_header and auth_header.startswith("Bearer "):
+        token = auth_header.split(" ")[1]
+        payload = decode_jwt_token(token)
+        
+        if payload is None:
+            return JsonResponse({"error": "Token is invalid or expired"}, status=401)
         else:
-            return Response({'message': 'Invalid username or password'}, status=status.HTTP_401_UNAUTHORIZED)
-    else:
-        return Response({'error': 'Customer not found'}, status=status.HTTP_404_NOT_FOUND)
-#protected route
-#@api_view(['GET'])
-#@permission_classes([IsAuthenticated])
-#def protected_view(request):
-#    return Response({"message": "You have accessed a protected route!"}, status=status.HTTP_200_OK)
+            return JsonResponse({"success": "You are already logged in"}, status=200)
+    
+    
+    # If no token is provided, fall back to username/password authentication
+    serializer = CustomerLoginSerializer(data=request.data)
+    if serializer.is_valid():
+        username = serializer.data.get('customer_username')
+        password = serializer.data.get('password')
 
+        try:
+            customer = Customer.objects.get(customer_username=username)
+            print(password)
+            print(customer.customer_password)
+            print(check_password(password,customer.customer_password))
+            if customer.check_password(password):  # Check hashed password
+                token = generate_jwt_token(customer)
+                return Response({
+                    'status': "Success",
+                    'access': token,
+                })
+            else:
+                return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+        except Customer.DoesNotExist:
+            return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+def protected_route(request):
+    
+    return Response({
+        'message': 'This is a protected route, accessible only with a valid JWT token.',
+    })
 
 #get all the customer
 @api_view(['GET'])

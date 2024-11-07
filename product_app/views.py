@@ -2,12 +2,18 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Product
 from .serializer import ProductSerializer
+from rest_framework.decorators import api_view
+from project.utils import generate_jwt_token, decode_jwt_token
+from project.utils import auth_required
 
 @api_view(["GET"])
+# @auth_required
 def get_all_products(request):
+    payload = getattr(request, 'payload', {})  # This will default to an empty dictionary if 'payload' does not exist
+
     products = Product.objects.all()
     serializer = ProductSerializer(products, many=True)
-    return Response(serializer.data)
+    return Response({"data":serializer.data})
 
 @api_view(["POST"])
 def add_product(request):
@@ -19,6 +25,8 @@ def add_product(request):
 
 @api_view(["GET"])
 def get_product_by_id(request):
+    
+    
     product_id = request.GET.get('product_id')
     if not product_id:
         return Response({'error': 'id parameter is required'}, status=400)

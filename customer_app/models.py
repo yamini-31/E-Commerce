@@ -1,17 +1,25 @@
 from django.db import models
-
+from django.contrib.auth.hashers import make_password, check_password
 from product_app.models import Product
+
 class Customer(models.Model):
-    id=models.AutoField(primary_key=True)
-    customer_name=models.CharField(max_length=200)
-    customer_address=models.CharField(max_length=250)
-    customer_phoneNo=models.CharField(max_length=100)
-    customer_password=models.CharField(max_length=100)
-    customer_username=models.CharField(max_length=200)
-    
+    id = models.AutoField(primary_key=True)
+    customer_name = models.CharField(max_length=200)
+    customer_address = models.CharField(max_length=250)
+    customer_phoneNo = models.CharField(max_length=100)
+    customer_password = models.CharField(max_length=100)
+    customer_username = models.CharField(max_length=200, unique=True)
+
+    def set_password(self, raw_password):
+        """Hash the password before storing it in the database."""
+        self.customer_password = make_password(raw_password)
+
+    def check_password(self, raw_password):
+        """Check if the given password matches the stored password."""
+        return check_password(raw_password, self.customer_password)
+
     def __str__(self):
         return self.customer_name
-
 
 
 class Cart(models.Model):
