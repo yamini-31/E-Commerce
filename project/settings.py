@@ -38,9 +38,12 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     'rest_framework',
+    'rest_framework_simplejwt',
     'product_app',
+    'seller_app',
     'customer_app',
-    'corsheaders'
+    'django_extensions',
+    'rest_framework_swagger'
 ]
 
 MIDDLEWARE = [
@@ -78,6 +81,14 @@ WSGI_APPLICATION = "project.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+#DATABASES = {
+ #   'default': {
+  #      'ENGINE': 'djongo',
+   #       'host': 'mongodb+srv://mongodb:mongodb@cluster0.doegm.mongodb.net/Ecommercedb?retryWrites=true&w=majority&appName=Cluster0',
+    #        'username': 'mongodb',  # Replace if your username is different
+    #       'password': 'mongodb',  # Replace if your password is different
+#
+#}
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -136,3 +147,9 @@ REST_FRAMEWORK = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # Frontend running on this URL
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+}

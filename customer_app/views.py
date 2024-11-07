@@ -8,7 +8,8 @@ from rest_framework_simplejwt.tokens import AccessToken
 from .models import *
 from django.http import JsonResponse
 from django.db.models import F, Sum
-from .serializers import CustomerSerializer
+from .serializer import CustomerSerializer, CartSerializer
+from seller_app.serializer import OrderSerializer
 from django.shortcuts import get_object_or_404
 
 
@@ -119,7 +120,7 @@ def add_product_to_cart(request):
     product_id = request.data.get('product_id')
     quantity = request.data.get('quantity', 1)
 
-    customer = get_object_or_404(Customer, id=customer_id)
+    customer = get_object_or_404(Customer, customer_id=customer_id)
     product = get_object_or_404(Product, product_id=product_id)
 
     price = product.product_price
@@ -148,6 +149,59 @@ def remove_product_from_cart(request):
 
     return JsonResponse({'message': 'Product removed from cart successfully'})
 
+
+
+@api_view(['POST'])
+def place_order_from_cart(request):
+    customer_id = request.data.get('customer_id')
+    cartObjects=Cart.objects.filter(customer_id=customer_id)
+    
+    # serializer = CartSerializer(cartObjects, many=True)
+    seller_ids = [cart_item.product.seller_id for cart_item in cartObjects]
+
+    # customer_id = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    # product_id = models.ForeignKey(Product, on_delete=models.CASCADE)
+    # seller_id = models.ForeignKey(Seller, on_delete=models.CASCADE)
+    # quantity = models.IntegerField()
+
+    for index,cartob in enumerate(cartObjects):
+
+        data={
+            "customer_id":cartob.customer.customer_id,
+            "product_id":cartob.product.product_id,
+            "seller_id":seller_ids[index],
+            "quantity":cartob.quantity,
+            "total_bill":(cartob.quantity*cartob.price),
+            "status":"pending"
+        }
+
+        print(data)
+
+        order_serializer = OrderSerializer(data=data)
+        if order_serializer.is_valid():
+            order_serializer.save()
+        else:
+            return Response({'message': 'Some problem'}, status=400)
+    return Response({"message":f"added all items to cart {len(seller_ids)}"}, status=201)
+
+    
+@api_view(['GET'])
+def show_cart(request, customer_id):
+    try:
+    # Filter orders by customer_id
+        cartItems = Cart.objects.filter(customer_id=customer_id)
+        if not cartItems.exists():
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        
+        # Serialize the queryset
+        ser = CartSerializer(cartItems, many=True)
+        return Response(ser.data)
+
+    except Customer.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+
 #calculate the final bill of the cart 
 
 # Function to calculate the total price of the cart
@@ -166,6 +220,3 @@ def calculate_final_price(customer_id):
 def get_cart_total(request, customer_id):
     total = calculate_final_price(customer_id)
     return Response({'total_price': total})
-
-
-
