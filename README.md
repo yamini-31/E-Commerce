@@ -1,6 +1,4 @@
-Here’s the modified `README.md` for your **E-Commerce Application**:
 
----
 
 # E-Commerce Application
 
