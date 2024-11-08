@@ -1,121 +1,157 @@
-E-Commerce Application
+Here’s the modified `README.md` for your **E-Commerce Application**:
 
-An e-commerce web application built using Django for the backend and React for the frontend. This project allows users to browse products, add items to their cart, and place orders. It also includes features for sellers to manage their inventory and for customers to view their order history.
-Project Structure
+---
 
-E-Commerce/
-│
-├── customer_app/          # Manages customer data and operations
-├── product_app/           # Handles product information and management
-├── project/               # Main Django project settings and URLs
-├── seller_app/            # Manages seller operations and inventory
-├── manage.py              # Django project management file
-├── requirements.txt       # Python dependencies
-└── frontend/              # Contains React frontend files
+# E-Commerce Application
 
-Features
-Customer
+![E-Commerce Application Diagram](assets/ER_diagram.png)  <!-- Add an ER Diagram or similar illustration if available -->
 
-    User authentication and profile management
-    View products and add them to the cart
-    Place orders and view order history
+## Description
 
-Seller
+The E-Commerce Application is a Django and React-based web application designed for managing an online store. This application enables customers to browse products, add items to their carts, and place orders, while providing features for sellers to manage product listings and inventory. Admins have full control over the data, including the ability to manage users, products, and orders.
 
-    Seller authentication and profile management
-    Add and manage product listings
-    View inventory and sales analytics
+## Technologies Used
 
-Admin
+This project utilizes the following technologies:
 
-    Manage users, products, and orders
-    View detailed sales reports and analytics
+- **Django**: A high-level Python web framework for developing the application backend, managing user authentication, and handling database operations.
+- **React**: A popular JavaScript library for building user interfaces, used for the frontend of the application.
+- **SQLite**: A lightweight relational database used for storing and managing data, integrated with Django’s ORM (Object-Relational Mapping).
+- **Git & GitHub**: Version control and collaboration tools for managing the project's source code and tracking changes.
 
-Technologies Used
+## Database Overview
 
-    Backend: Django, Django REST Framework
-    Frontend: React, Axios for API requests
-    Database: SQLite
-    Others: JWT for authentication, Material UI for styling
+The `ecommerce_db` database includes several tables, managed by Django models:
 
-Prerequisites
+- **Customers**: Manages customer data and includes information like name, contact details, and order history.
+- **Products**: Stores product details, including product name, price, availability, and categories.
+- **Orders**: Manages customer orders, including details of items ordered and payment status.
+- **Sellers**: Contains information about sellers and their products.
 
-    Python: 3.7+
-    Node.js: 12.0+
-    Django: 3.2+
-    React: 17.0+
+## Table Structure (Django Models)
 
-Getting Started
-1. Clone the Repository
+### 1. Customer Model
 
-git clone https://github.com/yamini-31/E-Commerce.git
-cd E-Commerce
+- **customer_id**: Unique identifier for each customer (Primary Key).
+- **customer_name**: Name of the customer.
+- **customer_address**: Address of the customer.
+- **customer_phoneNo**: Phone number of the customer.
+- **customer_username**: Unique username for the customer login.
+- **customer_password**: Password for the customer account (stored securely).
 
-2. Backend Setup
+### 2. Product Model
 
-    Create and activate a virtual environment:
+- **product_id**: Unique identifier for each product (Primary Key).
+- **item_name**: Name of the product.
+- **price**: Price of the product.
+- **on_discount**: Boolean indicating if the product is on discount.
+- **discount_price**: Discounted price, if applicable.
+- **category**: Category to which the product belongs.
+- **stock**: Quantity of product available.
+- **description**: Detailed description of the product.
 
-python -m venv venv
-source venv/bin/activate  # For Linux/Mac
-venv\Scripts\activate     # For Windows
+### 3. Order Model
 
-Install backend dependencies:
+- **order_id**: Unique identifier for each order (Primary Key).
+- **customer**: Foreign key to the Customer model.
+- **total_price**: Total price for the order.
+- **order_date**: Date when the order was placed.
+- **status**: Status of the order (e.g., `pending`, `shipped`, `delivered`).
 
-pip install -r requirements.txt
+### 4. Seller Model
 
-Apply migrations:
+- **seller_id**: Unique identifier for each seller (Primary Key).
+- **seller_name**: Name of the seller.
+- **seller_address**: Address of the seller.
+- **products**: Foreign key to the Product model, linking sellers with their products.
 
-python manage.py migrate
+## Getting Started
 
-Create a superuser (for accessing the Django admin):
+### 1. Clone the Repository
 
-python manage.py createsuperuser
+   ```bash
+   git clone https://github.com/yamini-31/E-Commerce.git
+   cd E-Commerce
+   ```
 
-Run the backend server:
+### 2. Backend Setup
 
-    python manage.py runserver
+1. **Set up a virtual environment**:
 
-    The backend will be running at http://127.0.0.1:8000.
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # For Linux/Mac
+   venv\Scripts\activate     # For Windows
+   ```
 
-3. Frontend Setup
+2. **Install dependencies**:
 
-    Navigate to the frontend directory:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-cd frontend
+3. **Run migrations**:
 
-Install frontend dependencies:
+   ```bash
+   python manage.py migrate
+   ```
 
-npm install
+4. **Create a superuser** (for accessing the Django admin):
 
-Start the frontend development server:
+   ```bash
+   python manage.py createsuperuser
+   ```
 
-    npm start
+5. **Run the backend server**:
 
-    The frontend will be running at http://localhost:3000.
+   ```bash
+   python manage.py runserver
+   ```
 
-4. Environment Variables
+   The backend will be running at `http://127.0.0.1:8000`.
 
-Create a .env file in the root of the project to store environment variables. Example:
+### 3. Frontend Setup
 
-# Django settings
-SECRET_KEY=your_secret_key
-DEBUG=True
+1. **Navigate to the frontend directory**:
 
-# React settings
-REACT_APP_API_URL=http://127.0.0.1:8000/api
+   ```bash
+   cd frontend
+   ```
 
-API Documentation
+2. **Install frontend dependencies**:
 
-The backend API is documented using Django REST Framework's built-in browsable API. You can access it by navigating to http://127.0.0.1:8000/api/ in your browser when the backend server is running.
-Usage
+   ```bash
+   npm install
+   ```
 
-    Customer: Users can sign up, log in, browse products, add items to the cart, and place orders.
-    Seller: Sellers can log in, add new products, and manage inventory.
-    Admin: Admin users can access Django's admin panel to manage all data.
+3. **Start the frontend development server**:
 
-Contributing
+   ```bash
+   npm start
+   ```
 
-If you'd like to contribute to this project, please fork the repository and make a pull request. Contributions, whether bug reports, feature requests, or improvements, are welcome.
-License
+   The frontend will be running at `http://localhost:3000`.
 
-This project is licensed under the MIT License.
+### 4. Environment Variables
+
+Create a `.env` file in the root of the project to store environment variables. Example:
+
+## Usage
+
+Access the application in your web browser at `http://127.0.0.1:8000/`. 
+
+- **Customers** can browse products, add them to their cart, place orders, and view order history.
+- **Sellers** can manage product listings, monitor stock, and update product information.
+- **Admins** can manage all data via Django's admin panel at `http://127.0.0.1:8000/admin`.
+
+## API Documentation
+
+The backend API is documented using Django REST Framework's browsable API. You can access it by navigating to `http://127.0.0.1:8000/api/` when the backend server is running.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+This README provides a structured and comprehensive overview for your E-Commerce Application. Adjust any specific instructions or environment configurations as needed!
