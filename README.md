@@ -2,6 +2,7 @@
 
 # E-Commerce Application
 
+![ER Diagram](myapp_models.png)
 
 ## Description
 
