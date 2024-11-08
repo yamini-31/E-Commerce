@@ -2,7 +2,6 @@
 
 # E-Commerce Application
 
-![E-Commerce Application Diagram](assets/ER_diagram.png)  <!-- Add an ER Diagram or similar illustration if available -->
 
 ## Description
 
